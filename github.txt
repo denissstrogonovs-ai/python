@@ -1,0 +1,5 @@
+# https://denissstrogonovs-ai.github.io/python/pardosana_vynoteka_2weeks.html?utm_source=chatgpt.com
+
+git add .
+git commit -m "update report"
+git push
