@@ -1,10 +1,17 @@
-VYNOTEKA 2 nedēļas
+VYNOTEKA — 4 nedēļu vidējais salīdzinājums
 
-Book_previous.xlsx = iepriekšējā nedēļa
-Book_current.xlsx = pašreizējā nedēļa
-Produkti tiek sasaistīti pēc Kods.
-Cenas katrai nedēļai tiek lasītas no attiecīgās Iestatījumi lapas.
-Koru Bay nosaukuma 12,5%/13% atšķirība tiek normalizēta, lai cena netiktu sajaukta.
+Book_current.xlsx = pašreizējā nedēļa.
+Book_previous.xlsx = 4 iepriekšējās nedēļas.
 
-Var pievienot jebkuru skaitu produktu abās Excel nedēļās.
-Kopējais veikalu reitings un produktu pārskati tiek veidoti automātiski visiem produktiem.
+Book_previous.xlsx lapā Sheet1 katram veikalam ir 4 kolonnas:
+1. nedēļa, 2. nedēļa, 3. nedēļa, 4. nedēļa.
+Ievadi pārdoto gabalu skaitu katram produktam un veikalam.
+
+Kods sasaista produktus pēc Kods.
+Katram veikalam un produktam tiek aprēķināts 4 nedēļu vidējais:
+(1. nedēļa + 2. nedēļa + 3. nedēļa + 4. nedēļa) / 4.
+
+Salīdzinājums atskaitē:
+pašreizējā nedēļa pret 4 nedēļu vidējo, nevis pret iepriekšējo nedēļu.
+
+Cenas tiek lasītas no Iestatījumi lapas.

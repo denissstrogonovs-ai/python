@@ -23,12 +23,8 @@ def clean_header(x):
     return re.sub(r"\s+"," ",str(x).strip())
 
 def read_book(path, store_order=None):
-    # Read the report exactly by column headers, not by row position.
-    # This prevents Book_current from taking values from the wrong store column
-    # when product rows are reordered.
     df=pd.read_excel(path,sheet_name="Sheet1")
     st=pd.read_excel(path,sheet_name="Iestatījumi",header=None)
-
     df.columns=[clean_header(c) for c in df.columns]
 
     required={"Kods","EAN kods","Nosaukums","Kopā"}
@@ -56,10 +52,8 @@ def read_book(path, store_order=None):
 
     price_map={norm_name(n):(s,p) for n,s,p in price_rows}
 
-    # Store columns are identified by header names.
     detected_store_cols=[c for c in df.columns if c not in BASE_COLUMNS]
 
-    # On Book_current use exactly the same store-column order as Book_previous.
     if store_order is not None:
         current_by_header={clean_header(c):c for c in detected_store_cols}
         missing_stores=[c for c in store_order if c not in current_by_header]
@@ -120,14 +114,34 @@ def read_book(path, store_order=None):
     return {"period":period,"products":products,"store_cols":store_cols}
 
 def main():
-    prev=read_book(PREVIOUS); cur=read_book(CURRENT, store_order=prev["store_cols"]); pm={p["code"]:p for p in prev["products"]}
+    prev=read_book(PREVIOUS)
+    cur=read_book(CURRENT, store_order=prev["store_cols"])
+    pm={p["code"]:p for p in prev["products"]}
     items=[{"code":c["code"],"current":c,"previous":pm[c["code"]]} for c in cur["products"] if c["code"] in pm]
-    if not items: raise ValueError("Nav vienādu produktu pēc Kods.")
-    # HTML ranks growth separately by percentage and by absolute units; a positive % can never be shown as a decline.
+    if not items:
+        raise ValueError("Nav vienādu produktu pēc Kods.")
+
     data={"current_period":cur["period"],"previous_period":prev["period"],"products":items}
-    OUTPUT.write_text(TEMPLATE.read_text(encoding="utf-8").replace("__DATA__",json.dumps(data,ensure_ascii=False,separators=(",",":"))),encoding="utf-8")
+
+    html=TEMPLATE.read_text(encoding="utf-8")
+    html=html.replace("__DATA__",json.dumps(data,ensure_ascii=False,separators=(",",":")))
+
+    # Requested change only: add the product names next to P1/P2
+    # in the "Pārdošana veikalos · visi produkti" block.
+    legend="P1 — #Cēsu Premium pint alus can 0,568L 5% · P2 — Chiara Tuncis saulespuķu eļļā 80gx3"
+
+    html=html.replace(
+        'Pārdošana veikalos · visi produkti',
+        f'Pārdošana veikalos · visi produkti<br><span style="font-size:9px;color:var(--muted);font-weight:600">{legend}</span>',
+        1
+    )
+
+    OUTPUT.write_text(html,encoding="utf-8")
     print("Gatavs:",OUTPUT)
     for x in items:
-        a=x["previous"];b=x["current"]; q=(b["total"]-a["total"])/a["total"]*100 if a["total"] else 0
+        a=x["previous"];b=x["current"]
+        q=(b["total"]-a["total"])/a["total"]*100 if a["total"] else 0
         print(f"{b['name']}: {a['total']} -> {b['total']} gab. ({q:+.1f}%), cena €{a['shelf']:.2f} -> €{b['shelf']:.2f}")
-if __name__=="__main__": main()
+
+if __name__=="__main__":
+    main()
