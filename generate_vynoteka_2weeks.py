@@ -212,10 +212,16 @@ def main():
     html=TEMPLATE.read_text(encoding="utf-8")
     html=html.replace("__DATA__",json.dumps(data,ensure_ascii=False,separators=(",",":")))
 
-    legend="P1 — #Cēsu Premium pint alus can 0,568L 5% · P2 — Chiara Tuncis saulespuķu eļļā 80gx3"
+    # P1/P2/... are assigned by the HTML after sorting products by current sales.
+    # Generate the legend in that same order so labels cannot be swapped.
     html=html.replace(
         "Pārdošana veikalos · visi produkti",
-        f'Pārdošana veikalos · visi produkti<br><span style="font-size:9px;color:var(--muted);font-weight:600">{legend}</span>',
+        "Pārdošana veikalos · visi produkti",
+        1
+    )
+    html=html.replace(
+        "const cur=DATA.products.map(x=>x.current),prev=DATA.products.map(x=>x.previous);",
+        "const cur=DATA.products.map(x=>x.current),prev=DATA.products.map(x=>x.previous);const productLegend=document.createElement('div');productLegend.style='font-size:9px;color:var(--muted);font-weight:600;margin-top:3px';productLegend.textContent=DATA.products.map((x,i)=>`P${i+1} — ${x.current.name}`).join(' · ');document.querySelector('.hero').appendChild(productLegend);",
         1
     )
 
